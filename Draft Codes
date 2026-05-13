@@ -39,3 +39,28 @@ CREATE TABLE category (
     id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR2(50) NOT NULL UNIQUE
 );
+CREATE TABLE venue (
+    id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR2(100) NOT NULL UNIQUE,
+    address VARCHAR2(150) NOT NULL UNIQUE,
+    capacity NUMBER NOT NULL
+);
+
+CREATE TABLE event (
+    id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR2(100) NOT NULL,
+    description CLOB NOT NULL,
+    start_datetime TIMESTAMP NOT NULL,
+    end_datetime TIMESTAMP NOT NULL,
+    ticket_price NUMBER(6,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    updated_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+
+    organizer_id NUMBER,
+    category_id NUMBER,
+    venue_id NUMBER,
+
+    CONSTRAINT fk_event_user FOREIGN KEY (organizer_id) REFERENCES users(id),
+    CONSTRAINT fk_event_category FOREIGN KEY (category_id) REFERENCES category(id),
+    CONSTRAINT fk_event_venue FOREIGN KEY (venue_id) REFERENCES venue(id)
+);
