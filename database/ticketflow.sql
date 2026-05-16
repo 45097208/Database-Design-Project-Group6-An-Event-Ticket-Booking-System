@@ -193,6 +193,16 @@ INSERT INTO booking (total_amount, status, user_id) VALUES
 (680.00,  'cancelled',   4),
 (850.00,  'confirmed',   5),
 (300.00,  'rejected',    7);
+
+INSERT INTO payment (payment_amount, payment_method, transaction_ref, payment_status, booking_id) VALUES
+(150.00, 'Card', 'TXN-001', 'Completed', 1),
+(200.00, 'EFT',  'TXN-002', 'Completed', 2),
+(700.00, 'Card', 'TXN-003', 'Completed', 3),
+(350.00, 'Cash', 'TXN-004', 'Completed', 4),
+(680.00, 'Card', 'TXN-006', 'Refunded',  6),
+(850.00, 'EFT',  'TXN-007', 'Completed', 7);
+
+
 -- =====================================================
 --  PART 3 — VIEWS & COMPANY INFORMATION QUERIES
 --  Member 3
