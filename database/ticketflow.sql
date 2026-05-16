@@ -202,6 +202,17 @@ INSERT INTO payment (payment_amount, payment_method, transaction_ref, payment_st
 (680.00, 'Card', 'TXN-006', 'Refunded',  6),
 (850.00, 'EFT',  'TXN-007', 'Completed', 7);
 
+INSERT INTO ticket (seat_number, ticket_status, booking_id, event_id) VALUES
+('A1', 'sold',      1, 1),
+('B3', 'sold',      2, 2),
+('C5', 'sold',      3, 3),
+('D2', 'sold',      4, 4),
+('E1', 'available', NULL, 5),
+('E2', 'available', NULL, 5),
+('F1', 'sold',      7, 3),
+('A2', 'available', NULL, 1),
+('B1', 'reserved',  NULL, 2),
+('G3', 'sold',      6, 6);
 
 -- =====================================================
 --  PART 3 — VIEWS & COMPANY INFORMATION QUERIES
