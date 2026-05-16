@@ -432,6 +432,39 @@ SELECT
     TRUNCATE(AVG(payment_amount), 0) AS avg_payment_truncated
 FROM payment
 GROUP BY payment_method;
+
+-- ── Date Functions ───────────────────────────────
+ 
+-- Show how many days until each event
+SELECT
+    name,
+    start_datetime,
+    DATEDIFF(start_datetime, NOW())             AS days_until_event,
+    DATE_FORMAT(start_datetime, '%d %M %Y')     AS formatted_date,
+    DAYNAME(start_datetime)                     AS day_of_week,
+    MONTHNAME(start_datetime)                   AS month_name,
+    YEAR(start_datetime)                        AS event_year
+FROM event
+ORDER BY start_datetime ASC;
+ 
+-- Show bookings made in the last 30 days (from sample data time)
+SELECT
+    id,
+    booking_time,
+    total_amount,
+    status,
+    DATE_FORMAT(booking_time, '%d-%m-%Y %H:%i') AS formatted_time
+FROM booking
+ORDER BY booking_time DESC;
+ 
+-- Extract month and year from payment timestamps
+SELECT
+    transaction_ref,
+    payment_amount,
+    MONTH(payment_timestamp)    AS payment_month,
+    YEAR(payment_timestamp)     AS payment_year,
+    NOW()                       AS current_datetime
+FROM payment;
  -- =====================================================
 --  PART 5 — AGGREGATES, JOINS & SUBQUERIES
 --  Member 5
