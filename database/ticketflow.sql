@@ -470,4 +470,33 @@ FROM payment;
 --  Member 5
 --  Paste your part5_aggregates_joins_subqueries.sql code below this line
 -- =====================================================
+ -- ── Aggregate Functions ─────────────────────────
+ 
+-- Total revenue from all completed payments
+SELECT
+    COUNT(*)                AS total_payments,
+    SUM(payment_amount)     AS total_revenue,
+    AVG(payment_amount)     AS average_payment,
+    MAX(payment_amount)     AS highest_payment,
+    MIN(payment_amount)     AS lowest_payment
+FROM payment
+WHERE payment_status = 'Completed';
+ 
+-- Count bookings by status
+SELECT
+    status,
+    COUNT(*) AS total_bookings
+FROM booking
+GROUP BY status;
+ 
+-- Count total tickets per event
+SELECT
+    e.name          AS event_name,
+    COUNT(t.id)     AS total_tickets,
+    SUM(CASE WHEN t.ticket_status = 'sold'      THEN 1 ELSE 0 END) AS sold,
+    SUM(CASE WHEN t.ticket_status = 'available' THEN 1 ELSE 0 END) AS available,
+    SUM(CASE WHEN t.ticket_status = 'reserved'  THEN 1 ELSE 0 END) AS reserved
+FROM event e
+LEFT JOIN ticket t ON t.event_id = e.id
+GROUP BY e.id, e.name;
  
