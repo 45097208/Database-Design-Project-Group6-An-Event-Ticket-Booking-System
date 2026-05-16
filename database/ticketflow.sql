@@ -15,7 +15,18 @@
 --  Member 1
 --  Paste your part1_schema.sql code below this line
 -- =====================================================
+ SET FOREIGN_KEY_CHECKS = 0;
  
+DROP TABLE IF EXISTS ticket;
+DROP TABLE IF EXISTS payment;
+DROP TABLE IF EXISTS booking;
+DROP TABLE IF EXISTS event;
+DROP TABLE IF EXISTS venue;
+DROP TABLE IF EXISTS category;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS role;
+ 
+SET FOREIGN_KEY_CHECKS = 1
  
  
  
