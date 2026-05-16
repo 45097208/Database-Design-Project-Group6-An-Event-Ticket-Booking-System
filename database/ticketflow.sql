@@ -151,6 +151,20 @@ CREATE INDEX idx_payment_booking  ON payment(booking_id);
 --  Member 2
 --  Paste your part2_data.sql code below this line
 -- =====================================================
+-- =====================================================
+--                       SAMPLE DATA
+-- =====================================================
+ 
+INSERT INTO role (name) VALUES ('Admin'), ('Organizer'), ('Customer');
+ 
+INSERT INTO category (name) VALUES ('Music'), ('Sports'), ('Comedy'), ('Theatre'), ('Conference');
+ 
+INSERT INTO venue (name, address, capacity) VALUES
+('City Hall',           '123 Main Street, Johannesburg',    500),
+('FNB Stadium',        '45 Stadium Road, Soweto',          1000),
+('Sandton Convention',  '161 Maude Street, Sandton',        2000),
+('Theatre on Square',   'Nelson Mandela Square, Sandton',   300),
+('Coca Cola Dome',      'Northgate, Johannesburg',          5000);
  
  
  
