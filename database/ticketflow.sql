@@ -183,6 +183,16 @@ INSERT INTO users (first_name, last_name, email, password_hash, phone_number, ro
 ('PNC Special Nights',        'Stand-up comedy show',             '2026-07-20 20:00:00', '2026-07-20 22:30:00', 350.00, 300,  1, 3, 4),
 ('Scorpion Kings',   'Biggest Amapiano event of 2026',   '2026-08-10 17:00:00', '2026-08-11 02:00:00', 450.00, 5000, 6, 1, 5),
 ('Red Bull Symphonic',        'Musical Festival',   '2026-09-05 19:00:00', '2026-09-05 22:00:00', 680.00, 300,  3, 4, 4);
+
+INSERT INTO booking (total_amount, status, user_id) VALUES
+(150.00,  'confirmed',   2),
+(200.00,  'confirmed',   4),
+(700.00,  'confirmed',   5),
+(350.00,  'confirmed',   7),
+(450.00,  'in-progress', 2),
+(680.00,  'cancelled',   4),
+(850.00,  'confirmed',   5),
+(300.00,  'rejected',    7);
 -- =====================================================
 --  PART 3 — VIEWS & COMPANY INFORMATION QUERIES
 --  Member 3
