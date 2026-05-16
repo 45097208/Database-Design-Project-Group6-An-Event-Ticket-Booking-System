@@ -452,3 +452,260 @@
       .events-grid { grid-template-columns: 1fr; }
     }
   </style>
+
+  </head>
+<body>
+
+<!-- ambient blobs -->
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+<div class="bg-blob bg-blob-3"></div>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="#" onclick="showSection('events');return false">
+      <div class="logo-mark">🎟</div>
+      TicketFlow
+    </a>
+    <div class="nav-right">
+      <button class="nav-link" onclick="showSection('events')">Events</button>
+      <button class="nav-link" id="myTicketsBtn" style="display:none" onclick="showMyTickets()">My Tickets</button>
+      <button class="nav-cta" id="loginBtn" onclick="openAuth('login')">Sign in</button>
+      <div class="user-pill" id="userPill" style="display:none" onclick="showMyTickets()">
+        <div class="avatar" id="userAvatar">?</div>
+        <span class="user-name" id="userName"></span>
+      </div>
+      <button class="nav-link" id="logoutBtn" style="display:none" onclick="doLogout()">Log out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════ HERO ═══════════ -->
+<div class="hero" id="heroSection">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <div class="hero-kicker">
+        <span class="kicker-badge">NEW</span>
+        Johannesburg's smartest booking platform
+      </div>
+      <h1>Find your next<br><span class="grad">unforgettable</span><br>experience.</h1>
+      <p class="hero-desc">Live music, sports showdowns, comedy nights and cultural theatre — all in one place. Book your seat in seconds.</p>
+      <div class="hero-btns">
+        <button class="btn btn-dark" onclick="showSection('events')">Browse Events &rarr;</button>
+        <button class="btn btn-ghost" id="heroRegBtn" onclick="openAuth('register')">Create Account</button>
+      </div>
+      <div class="hero-stats">
+        <div><div class="hstat-num" id="hstatEvents">6</div><div class="hstat-label">Live Events</div></div>
+        <div><div class="hstat-num">5</div><div class="hstat-label">Venues</div></div>
+        <div><div class="hstat-num">R150+</div><div class="hstat-label">Tickets from</div></div>
+        <div><div class="hstat-num">5K+</div><div class="hstat-label">Seats available</div></div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="float-pill p1">
+        <div class="fp-icon" style="background:#ede9fe">🎵</div>
+        <span>Soul Session — Live Tonight</span>
+      </div>
+      <div class="glass-card">
+        <div class="gc-label">Featured Event</div>
+        <div class="gc-event">Scorpion Kings Live</div>
+        <div class="gc-sub">📍 Coca Cola Dome · Aug 10, 2026</div>
+        <div class="gc-grid">
+          <div class="gc-chip"><div class="gc-chip-label">Category</div><div class="gc-chip-val">🎵 Amapiano</div></div>
+          <div class="gc-chip"><div class="gc-chip-label">Capacity</div><div class="gc-chip-val">5,000 seats</div></div>
+        </div>
+        <div class="gc-price">R450.00</div>
+        <button class="gc-btn" onclick="showSection('events')">Book Your Seat →</button>
+      </div>
+      <div class="float-pill p2">
+        <div class="fp-icon" style="background:#dcfce7">⚽</div>
+        <span>Spain vs Cape Verde · 1,000 seats</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ EVENTS ═══════════ -->
+<section id="eventsSection" style="display:none">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <div class="section-title">Upcoming Events</div>
+        <div class="section-sub">All events pulled live from the database</div>
+      </div>
+    </div>
+    <div class="filter-row">
+      <button class="chip active" onclick="filterCat('all',this)">All Events</button>
+      <button class="chip" onclick="filterCat('Music',this)">🎵 Music</button>
+      <button class="chip" onclick="filterCat('Sports',this)">⚽ Sports</button>
+      <button class="chip" onclick="filterCat('Comedy',this)">😂 Comedy</button>
+      <button class="chip" onclick="filterCat('Theatre',this)">🎭 Theatre</button>
+      <button class="chip" onclick="filterCat('Conference',this)">💼 Conference</button>
+    </div>
+    <div id="eventsGrid" class="events-grid">
+      <div class="empty" style="grid-column:1/-1"><div class="spinner"></div><p>Loading events…</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ MY TICKETS ═══════════ -->
+<section id="myTicketsSection" style="display:none">
+  <div class="container">
+    <div class="section-header">
+      <div><div class="section-title">My Tickets</div><div class="section-sub">Your complete booking history</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="showSection('events')">Browse More</button>
+    </div>
+    <div id="bookingsWrap"></div>
+  </div>
+</section>
+
+<!-- ═══════════ AUTH MODAL ═══════════ -->
+<div class="overlay" id="authOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="authTitle">Welcome back</div>
+        <div class="modal-sub" id="authSub">Sign in to your TicketFlow account</div>
+      </div>
+      <button class="modal-x" onclick="closeOverlay('authOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="seg">
+        <button class="seg-btn active" id="tabLogin"    onclick="switchTab('login')">Sign In</button>
+        <button class="seg-btn"        id="tabRegister" onclick="switchTab('register')">Create Account</button>
+      </div>
+      <div class="alert" id="alertAuth"></div>
+
+      <!-- LOGIN -->
+      <div id="loginForm">
+        <div class="fg-group"><label class="fg-label">Email</label><input class="fg-input" type="email" id="liEmail" placeholder="you@example.com"/></div>
+        <div class="fg-group"><label class="fg-label">Password</label><input class="fg-input" type="password" id="liPass" placeholder="••••••••"/></div>
+        <button class="btn btn-grad btn-full" onclick="doLogin()">Sign In →</button>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="registerForm" style="display:none">
+        <div class="fg-row">
+          <div class="fg-group"><label class="fg-label">First Name</label><input class="fg-input" type="text" id="rgFirst" placeholder="Thabo"/></div>
+          <div class="fg-group"><label class="fg-label">Last Name</label> <input class="fg-input" type="text" id="rgLast"  placeholder="Nkosi"/></div>
+        </div>
+        <div class="fg-group"><label class="fg-label">Email</label>   <input class="fg-input" type="email"    id="rgEmail" placeholder="you@example.com"/></div>
+        <div class="fg-group"><label class="fg-label">Password</label><input class="fg-input" type="password" id="rgPass"  placeholder="Choose a password"/></div>
+        <div class="fg-group">
+          <label class="fg-label">Phone <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input class="fg-input" type="tel" id="rgPhone" placeholder="0812345678" maxlength="10"/>
+        </div>
+        <button class="btn btn-grad btn-full" onclick="doRegister()">Create Account →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ BOOKING MODAL ═══════════ -->
+<div class="overlay" id="bookingOverlay">
+  <div class="modal" style="max-width:530px">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Book a Ticket</div>
+        <div class="modal-sub">Pick your seat and confirm payment</div>
+      </div>
+      <button class="modal-x" onclick="closeOverlay('bookingOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- step indicators -->
+      <div class="steps">
+        <div class="step act" id="bkStep1"><div class="step-n">1</div><span>Seat</span></div>
+        <div class="step-ln"></div>
+        <div class="step" id="bkStep2"><div class="step-n">2</div><span>Pay</span></div>
+        <div class="step-ln"></div>
+        <div class="step" id="bkStep3"><div class="step-n">3</div><span>Done</span></div>
+      </div>
+
+      <div class="alert" id="alertBk"></div>
+
+      <!-- ── STEP 1 ── -->
+      <div id="bkPane1">
+        <div class="ev-summary">
+          <div class="ev-summary-name" id="bkEvName"></div>
+          <div class="ev-summary-sub"  id="bkEvInfo"></div>
+        </div>
+        <div class="legend">
+          <span><span class="ld" style="background:var(--white);border:1.5px solid var(--border2)"></span>Available</span>
+          <span><span class="ld" style="background:var(--accent)"></span>Selected</span>
+          <span><span class="ld" style="background:#fecaca"></span>Sold</span>
+          <span><span class="ld" style="background:#fde68a"></span>Reserved</span>
+        </div>
+        <div class="seats-panel">
+          <div class="stage-bar">— Stage / Field —</div>
+          <div id="seatsGrid" class="seats-g"></div>
+        </div>
+        <div class="fg-group">
+          <label class="fg-label">Or type a new seat number</label>
+          <input class="fg-input" type="text" id="manualSeat" placeholder="e.g. H5" oninput="this.value=this.value.toUpperCase()"/>
+          <div class="fg-hint">Letters and numbers only</div>
+        </div>
+        <button class="btn btn-grad btn-full" style="margin-top:4px" onclick="nextToPayment()">Continue →</button>
+      </div>
+
+      <!-- ── STEP 2 ── -->
+      <div id="bkPane2" style="display:none">
+        <div class="fg-group">
+          <label class="fg-label">Payment Method</label>
+          <select class="fg-select" id="payMethod">
+            <option value="Card">💳 Card</option>
+            <option value="EFT">🏦 EFT</option>
+            <option value="Cash">💵 Cash</option>
+          </select>
+        </div>
+        <div class="confirm-panel">
+          <div class="confirm-row"><span class="c-label">Event</span>     <span class="c-val"   id="cfEvt"></span></div>
+          <div class="confirm-row"><span class="c-label">Seat</span>      <span class="c-val"   id="cfSeat"></span></div>
+          <div class="confirm-row"><span class="c-label">Amount Due</span><span class="c-price" id="cfAmt"></span></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" style="border-radius:var(--r)" onclick="backToSeats()">← Back</button>
+          <button class="btn btn-grad" style="flex:1;justify-content:center;border-radius:var(--r)" onclick="confirmBooking()">Confirm &amp; Pay</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 3 — RECEIPT ── -->
+      <div id="bkPane3" style="display:none">
+        <div class="receipt">
+          <div class="rcpt-head">
+            <div class="rcpt-logo">TICKETFLOW</div>
+            <div class="rcpt-badge">Booking Confirmed</div>
+          </div>
+          <div class="rcpt-body">
+            <div class="rcpt-event" id="rc_event"></div>
+            <div class="rcpt-cat"   id="rc_cat"></div>
+            <div class="rcpt-seat-box">
+              <div class="rcpt-seat-label">Your Seat</div>
+              <div class="rcpt-seat-num" id="rc_seat"></div>
+            </div>
+            <div class="rcpt-row"><span class="rcpt-rl">👤 Customer</span><span class="rcpt-rv" id="rc_name"></span></div>
+            <div class="rcpt-row"><span class="rcpt-rl">📧 Email</span>   <span class="rcpt-rv" id="rc_email"></span></div>
+            <div class="rcpt-row"><span class="rcpt-rl">📅 Date</span>    <span class="rcpt-rv" id="rc_date"></span></div>
+            <div class="rcpt-row"><span class="rcpt-rl">🕐 Time</span>    <span class="rcpt-rv" id="rc_time"></span></div>
+            <div class="rcpt-row"><span class="rcpt-rl">📍 Venue</span>   <span class="rcpt-rv" id="rc_venue"></span></div>
+            <div class="rcpt-row"><span class="rcpt-rl">💳 Method</span>  <span class="rcpt-rv" id="rc_method"></span></div>
+            <div class="rcpt-amt-box">
+              <div class="rcpt-amt" id="rc_amt"></div>
+              <div class="rcpt-amt-label">Amount Paid</div>
+            </div>
+            <div class="rcpt-ok">✓ Payment Successful</div>
+            <div class="rcpt-txn" id="rc_txn"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button class="btn btn-ghost" style="flex:1;justify-content:center;border-radius:var(--r)" onclick="closeOverlay('bookingOverlay');showMyTickets()">My Tickets</button>
+          <button class="btn btn-dark"  style="flex:1;justify-content:center;border-radius:var(--r)" onclick="closeOverlay('bookingOverlay');showSection('events')">Browse More</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
