@@ -133,6 +133,18 @@ CREATE TABLE ticket (
         FOREIGN KEY (event_id) REFERENCES event(id)
         ON DELETE SET NULL
 );
+-- =====================================================
+--                      INDEXES
+-- =====================================================
+ 
+CREATE INDEX idx_users_email      ON users(email);
+CREATE INDEX idx_event_date       ON event(start_datetime);
+CREATE INDEX idx_event_organizer  ON event(organizer_id);
+CREATE INDEX idx_booking_user     ON booking(user_id);
+CREATE INDEX idx_booking_status   ON booking(status);
+CREATE INDEX idx_ticket_event     ON ticket(event_id);
+CREATE INDEX idx_payment_booking  ON payment(booking_id);
+
  
 -- =====================================================
 --  PART 2 — SAMPLE DATA (All INSERT statements)
