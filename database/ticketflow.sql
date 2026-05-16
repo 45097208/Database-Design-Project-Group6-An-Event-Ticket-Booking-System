@@ -389,8 +389,50 @@ WHERE capacity >= 300 AND capacity <= 2000;
 SELECT name, start_datetime, ticket_price
 FROM event
 WHERE name LIKE 'J%' OR name LIKE 'A%';
-  
--- =====================================================
+   
+-- ── Variables & Character Functions ─────────────
+ 
+-- Use a variable to find bookings above a set amount
+SET @min_amount = 500.00;
+SELECT id, total_amount, status
+FROM booking
+WHERE total_amount >= @min_amount;
+ 
+-- Character functions - uppercase, lowercase, length
+SELECT
+    UPPER(name)                             AS event_upper,
+    LOWER(name)                             AS event_lower,
+    LENGTH(name)                            AS name_length,
+    CONCAT('Event: ', name)                 AS full_label,
+    SUBSTRING(name, 1, 5)                   AS short_name
+FROM event;
+ 
+-- Format customer full name with character functions
+SELECT
+    CONCAT(UPPER(first_name), ' ', UPPER(last_name))    AS full_name_upper,
+    LOWER(email)                                         AS email_lower,
+    LENGTH(CONCAT(first_name, last_name))                AS name_length
+FROM users;
+ 
+-- ── Rounding & Truncation ────────────────────────
+ 
+-- Round and truncate ticket prices
+SELECT
+    name,
+    ticket_price,
+    ROUND(ticket_price, 0)          AS price_rounded,
+    TRUNCATE(ticket_price, 0)       AS price_truncated,
+    ROUND(ticket_price * 1.15, 2)   AS price_with_vat
+FROM event;
+ 
+-- Round average payment amounts
+SELECT
+    payment_method,
+    ROUND(AVG(payment_amount), 2)   AS avg_payment_rounded,
+    TRUNCATE(AVG(payment_amount), 0) AS avg_payment_truncated
+FROM payment
+GROUP BY payment_method;
+ -- =====================================================
 --  PART 5 — AGGREGATES, JOINS & SUBQUERIES
 --  Member 5
 --  Paste your part5_aggregates_joins_subqueries.sql code below this line
