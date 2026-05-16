@@ -26,9 +26,71 @@ DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS role;
  
-SET FOREIGN_KEY_CHECKS = 1
+SET FOREIGN_KEY_CHECKS = 1;
  
+ -- =====================================================
+--           TABLES (with constraints & 3NF)
+-- =====================================================
  
+CREATE TABLE role (
+    id   INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+ 
+CREATE TABLE users (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    first_name    VARCHAR(100) NOT NULL,
+    last_name     VARCHAR(100) NOT NULL,
+    email         VARCHAR(100) NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    phone_number  VARCHAR(10) UNIQUE,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    role_id       INT,
+    CONSTRAINT fk_users_role
+        FOREIGN KEY (role_id) REFERENCES role(id)
+        ON DELETE SET NULL
+);
+ 
+CREATE TABLE category (
+    id   INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+ 
+CREATE TABLE venue (
+    id       INT AUTO_INCREMENT PRIMARY KEY,
+    name     VARCHAR(100) NOT NULL UNIQUE,
+    address  VARCHAR(150) NOT NULL UNIQUE,
+    capacity INT NOT NULL,
+    CONSTRAINT chk_venue_capacity CHECK (capacity > 0)
+);
+ 
+CREATE TABLE event (
+    id             INT AUTO_INCREMENT PRIMARY KEY,
+    name           VARCHAR(100) NOT NULL,
+    description    TEXT NOT NULL,
+    start_datetime DATETIME NOT NULL,
+    end_datetime   DATETIME NOT NULL,
+    ticket_price   DECIMAL(8,2) NOT NULL,
+    event_capacity INT NOT NULL,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    organizer_id   INT,
+    category_id    INT,
+    venue_id       INT,
+    CONSTRAINT chk_ticket_price    CHECK (ticket_price >= 0),
+    CONSTRAINT chk_event_capacity  CHECK (event_capacity > 0),
+    CONSTRAINT chk_event_dates     CHECK (end_datetime > start_datetime),
+    CONSTRAINT fk_event_organizer
+        FOREIGN KEY (organizer_id) REFERENCES users(id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_event_category
+        FOREIGN KEY (category_id) REFERENCES category(id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_event_venue
+        FOREIGN KEY (venue_id) REFERENCES venue(id)
+        ON DELETE SET NULL
+);
  
 -- =====================================================
 --  PART 2 — SAMPLE DATA (All INSERT statements)
