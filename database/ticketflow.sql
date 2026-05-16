@@ -92,6 +92,48 @@ CREATE TABLE event (
         ON DELETE SET NULL
 );
  
+CREATE TABLE booking (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total_amount DECIMAL(10,2) NOT NULL,
+    status       ENUM('in-progress', 'confirmed', 'cancelled', 'rejected') NOT NULL DEFAULT 'in-progress',
+    user_id      INT,
+    CONSTRAINT chk_booking_amount CHECK (total_amount >= 0),
+    CONSTRAINT fk_booking_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE SET NULL
+);
+ 
+CREATE TABLE payment (
+    id                INT AUTO_INCREMENT PRIMARY KEY,
+    payment_amount    DECIMAL(10,2) NOT NULL,
+    payment_method    ENUM('Cash', 'Card', 'EFT') NOT NULL,
+    transaction_ref   VARCHAR(100) UNIQUE,
+    payment_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    payment_status    ENUM('Pending', 'Completed', 'Failed', 'Refunded') NOT NULL DEFAULT 'Pending',
+    booking_id        INT,
+    CONSTRAINT chk_payment_amount CHECK (payment_amount > 0),
+    CONSTRAINT fk_payment_booking
+        FOREIGN KEY (booking_id) REFERENCES booking(id)
+        ON DELETE SET NULL
+);
+ 
+CREATE TABLE ticket (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    seat_number   VARCHAR(10) NOT NULL,
+    ticket_status ENUM('available', 'reserved', 'sold') NOT NULL DEFAULT 'available',
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    booking_id    INT,
+    event_id      INT,
+    CONSTRAINT uq_seat_event UNIQUE (seat_number, event_id),
+    CONSTRAINT fk_ticket_booking
+        FOREIGN KEY (booking_id) REFERENCES booking(id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_ticket_event
+        FOREIGN KEY (event_id) REFERENCES event(id)
+        ON DELETE SET NULL
+);
+ 
 -- =====================================================
 --  PART 2 — SAMPLE DATA (All INSERT statements)
 --  Member 2
