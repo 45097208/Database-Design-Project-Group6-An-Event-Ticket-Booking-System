@@ -338,8 +338,30 @@ WHERE t.ticket_status = 'sold';
 --  Member 4
 --  Paste your part4_functions_queries.sql code below this line
 -- =====================================================
+ -- ── Query Limitations (specific rows & columns) ─
  
+-- Show only the first 3 upcoming events (LIMIT)
+SELECT name, start_datetime, ticket_price
+FROM event
+ORDER BY start_datetime ASC
+LIMIT 3;
  
+-- Show only event name and price (column limitation)
+SELECT name, ticket_price
+FROM event;
+ 
+-- ── Sorting Operations ───────────────────────────
+ 
+--  Sort events by ticket price highest to lowest
+SELECT name, ticket_price, event_capacity
+FROM event
+ORDER BY ticket_price DESC;
+ 
+-- Sort users alphabetically by last name
+SELECT first_name, last_name, email
+FROM users
+ORDER BY last_name ASC, first_name ASC;
+  
  
  
 -- =====================================================
