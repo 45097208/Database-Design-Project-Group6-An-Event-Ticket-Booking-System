@@ -2,18 +2,10 @@
 --  EVENT TICKET BOOKING SYSTEM
 --  PHASE 3: PHYSICAL DESIGN
 --  MySQL Version
+
 -- =====================================================
---  HOW TO USE THIS FILE:
---  Each member pastes their part in the correct section
---  below and commits their changes to GitHub.
---  Parts must be run in order: 1 → 2 → 3 → 4 → 5
--- =====================================================
- 
- 
--- =====================================================
---  PART 1 — SCHEMA (Tables & Indexes)
---  Member 1
---  Paste your part1_schema.sql code below this line
+-- SCHEMA (Tables & Indexes)
+--  part1_schema.sql code 
 -- =====================================================
  SET FOREIGN_KEY_CHECKS = 0;
  
@@ -147,9 +139,8 @@ CREATE INDEX idx_payment_booking  ON payment(booking_id);
 
  
 -- =====================================================
---  PART 2 — SAMPLE DATA (All INSERT statements)
---  Member 2
---  Paste your part2_data.sql code below this line
+--  SAMPLE DATA (All INSERT statements)
+--  part2_data.sql code 
 -- =====================================================
 -- =====================================================
 --                       SAMPLE DATA
@@ -215,9 +206,8 @@ INSERT INTO ticket (seat_number, ticket_status, booking_id, event_id) VALUES
 ('G3', 'sold',      6, 6);
 
 -- =====================================================
---  PART 3 — VIEWS & COMPANY INFORMATION QUERIES
---  Member 3
---  Paste your part3_views_and_info_queries.sql code below this line
+--  VIEWS & COMPANY INFORMATION QUERIES
+--  part3_views_and_info_queries.sql code 
 -- =====================================================
  -- =====================================================
 --                       VIEWS
@@ -334,9 +324,8 @@ WHERE t.ticket_status = 'sold';
  
  
 -- =====================================================
---  PART 4 — FUNCTIONS & OPERATORS QUERIES
---  Member 4
---  Paste your part4_functions_queries.sql code below this line
+--   FUNCTIONS & OPERATORS QUERIES
+--   part4_functions_queries.sql code
 -- =====================================================
  -- ── Query Limitations (specific rows & columns) ─
  
@@ -466,9 +455,8 @@ SELECT
     NOW()                       AS current_datetime
 FROM payment;
  -- =====================================================
---  PART 5 — AGGREGATES, JOINS & SUBQUERIES
---  Member 5
---  Paste your part5_aggregates_joins_subqueries.sql code below this line
+--  AGGREGATES, JOINS & SUBQUERIES
+--  part5_aggregates_joins_subqueries.sql code
 -- =====================================================
  -- ── Aggregate Functions ─────────────────────────
  
