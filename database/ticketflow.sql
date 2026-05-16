@@ -219,6 +219,29 @@ INSERT INTO ticket (seat_number, ticket_status, booking_id, event_id) VALUES
 --  Member 3
 --  Paste your part3_views_and_info_queries.sql code below this line
 -- =====================================================
+ -- =====================================================
+--                       VIEWS
+-- =====================================================
+ 
+-- Full event details with venue, category and organizer
+CREATE OR REPLACE VIEW vw_event_details AS
+SELECT
+    e.id                                    AS event_id,
+    e.name                                  AS event_name,
+    e.description,
+    e.start_datetime,
+    e.end_datetime,
+    e.ticket_price,
+    e.event_capacity,
+    v.name                                  AS venue_name,
+    v.address                               AS venue_address,
+    v.capacity                              AS venue_capacity,
+    c.name                                  AS category_name,
+    CONCAT(u.first_name, ' ', u.last_name)  AS organizer_name
+FROM event e
+JOIN venue    v ON e.venue_id    = v.id
+JOIN category c ON e.category_id = c.id
+JOIN users    u ON e.organizer_id = u.id;
  
  
  
