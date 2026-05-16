@@ -16,11 +16,10 @@ app.use(express.json());
 app.use(express.static('../frontend'));   // serve your HTML files
 
 // ── Database Connection ─────────────────────────────
-// ⚠️  UPDATE THESE VALUES to match your MySQL setup
 const dbConfig = {
   host:     'localhost',
   user:     'root',        // your MySQL username
-  password: 'LeseGO@1',         // your MySQL password
+  password: '',         //Remember to your MySQL password
   database: 'ticketflow',  // the name you gave your database (run the SQL script first)
   port:     3306
 };
