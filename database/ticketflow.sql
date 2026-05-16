@@ -166,7 +166,15 @@ INSERT INTO venue (name, address, capacity) VALUES
 ('Theatre on Square',   'Nelson Mandela Square, Sandton',   300),
 ('Coca Cola Dome',      'Northgate, Johannesburg',          5000);
  
- 
+INSERT INTO users (first_name, last_name, email, password_hash, phone_number, role_id) VALUES
+('Mr LI',    'Phiri',      '36151262@mynwu.ac.za',     'Phiri001', '0680952852', 2),
+('Mr LB',    'Zwane',    '380061813@mynwu.ac.za',     'Zwane002', '0788543586', 3),
+('MR QN',   'Kumane',    '45097208@mynwu.ac.za',    'Kumane003', '0734567890', 2),
+('Ms MP',   'Rikhotso',  '42910692@mynwu.ac.za',    'Rikhotso004', '0745678901', 3),
+('Mr TJ',  'Sithole',  '51636654@mynwu.ac.za',   'Sithole005', '0756789012', 3),
+('Ms SD',   'Mafifi',  '29873339@mynwu.ac.za',    'Mafifi006', '0614657675', 2),
+('Ms K',  'Kgaticwe',    '46768440@mynwu.ac.za',   'Kgaticwe007', '0763260429', 3),
+('Ms SP',   'Mbongozi',     '43759955@mynwu.ac.za',    'Mbongozi008', '0763198342', 1); 
  
  
 -- =====================================================
