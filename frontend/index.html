@@ -709,3 +709,330 @@
 </div>
 
 <script>
+
+  // ═══════════════════════════════════════════════════
+//   TICKETFLOW — App Logic
+// ═══════════════════════════════════════════════════
+const API = 'http://localhost:3001/api';
+const EMOJIS = { Music:'🎵', Sports:'⚽', Comedy:'😂', Theatre:'🎭', Conference:'💼' };
+
+let currentUser  = JSON.parse(localStorage.getItem('tf_user') || 'null');
+let currentEvent = null;
+let selectedSeat = null;
+let allEvents    = [];
+
+// ── Boot ────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  updateNav();
+  showSection('events');
+});
+
+// ── Sections ────────────────────────────────────────
+function showSection(name) {
+  document.getElementById('heroSection').style.display       = name === 'hero'    ? '' : 'none';
+  document.getElementById('eventsSection').style.display     = name === 'events'  ? '' : 'none';
+  document.getElementById('myTicketsSection').style.display  = name === 'tickets' ? '' : 'none';
+  if (name === 'events') loadEvents();
+}
+
+function showMyTickets() {
+  if (!currentUser) { openAuth('login'); return; }
+  showSection('tickets');
+  loadBookings();
+}
+
+// ── Nav ─────────────────────────────────────────────
+function updateNav() {
+  const on = !!currentUser;
+  document.getElementById('loginBtn').style.display     = on ? 'none' : '';
+  document.getElementById('userPill').style.display     = on ? ''     : 'none';
+  document.getElementById('logoutBtn').style.display    = on ? ''     : 'none';
+  document.getElementById('myTicketsBtn').style.display = on ? ''     : 'none';
+  const rb = document.getElementById('heroRegBtn');
+  if (rb) rb.style.display = on ? 'none' : '';
+  if (on) {
+    document.getElementById('userAvatar').textContent = (currentUser.first_name[0] + currentUser.last_name[0]).toUpperCase();
+    document.getElementById('userName').textContent   = currentUser.first_name;
+  }
+}
+
+function doLogout() {
+  currentUser = null;
+  localStorage.removeItem('tf_user');
+  updateNav();
+  showSection('events');
+}
+
+// ── Load events ─────────────────────────────────────
+async function loadEvents() {
+  const grid = document.getElementById('eventsGrid');
+  grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="spinner"></div><p>Loading events…</p></div>`;
+  try {
+    const res = await fetch(`${API}/events`);
+    allEvents  = await res.json();
+    if (allEvents.length) document.getElementById('hstatEvents').textContent = allEvents.length;
+    renderEvents(allEvents);
+  } catch {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><h3>Backend not running</h3><p>Run <code>node server.js</code> in the backend folder</p></div>`;
+  }
+}
+
+function filterCat(cat, btn) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const list = cat === 'all' ? allEvents : allEvents.filter(e => e.category_name === cat);
+  renderEvents(list);
+}
+
+function renderEvents(events) {
+  const grid = document.getElementById('eventsGrid');
+  if (!events.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🎭</div><h3>No events found</h3><p>Try a different category</p></div>`;
+    return;
+  }
+  grid.innerHTML = events.map(ev => {
+    const sold  = ev.tickets_sold || 0;
+    const pct   = Math.min(100, Math.round((sold / ev.event_capacity) * 100));
+    const fillC = pct > 80 ? 'cap-high' : pct > 50 ? 'cap-med' : 'cap-low';
+    const cat   = ev.category_name;
+    const catL  = cat.toLowerCase();
+    const emoji = EMOJIS[cat] || '🎪';
+    const d     = new Date(ev.start_datetime);
+    const dateS = d.toLocaleDateString('en-ZA', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    const timeS = d.toLocaleTimeString('en-ZA', { hour:'2-digit', minute:'2-digit' });
+    const inits = ev.organizer_name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+    const price = parseFloat(ev.ticket_price).toFixed(2);
+    const left  = ev.event_capacity - sold;
+    return `
+    <div class="event-card" onclick='openBooking(${JSON.stringify(ev).replace(/'/g,"&#39;")})'>
+      <div class="card-banner bn-${catL}">
+        <div class="card-banner-emoji">${emoji}</div>
+        <div class="card-cat-pill cp-${catL}">${cat}</div>
+        <div class="card-price-tag">R${price}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${ev.event_name}</div>
+        <div class="card-desc">${ev.description}</div>
+        <div class="card-meta">
+          <div class="card-meta-row"><div class="meta-icon">📅</div>${dateS} &middot; ${timeS}</div>
+          <div class="card-meta-row"><div class="meta-icon">📍</div>${ev.venue_name}</div>
+          <div class="card-meta-row"><div class="meta-icon">🏟</div>${ev.venue_address}</div>
+        </div>
+        <div class="cap-bar"><div class="cap-fill ${fillC}" style="width:${pct}%"></div></div>
+        <div class="cap-info"><span>${pct}% full</span><span>${left} seat${left!==1?'s':''} left</span></div>
+        <div class="card-foot">
+          <div class="org-chip">
+            <div class="org-av">${inits}</div>
+            <span class="org-name">${ev.organizer_name}</span>
+          </div>
+          <button class="btn btn-dark btn-sm">Book Now</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Booking flow ─────────────────────────────────────
+async function openBooking(ev) {
+  if (!currentUser) { openAuth('login'); return; }
+  currentEvent = ev;
+  selectedSeat = null;
+  goStep(1);
+  setAlert('alertBk', '', '');
+
+  document.getElementById('bkEvName').textContent = ev.event_name;
+  const d = new Date(ev.start_datetime);
+  document.getElementById('bkEvInfo').textContent =
+    `${d.toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long'})} · ${ev.venue_name} · R${parseFloat(ev.ticket_price).toFixed(2)}`;
+
+  document.getElementById('seatsGrid').innerHTML =
+    '<div style="color:var(--muted);font-size:.8rem;grid-column:1/-1">Loading seats…</div>';
+
+  try {
+    const res   = await fetch(`${API}/events/${ev.id}/seats`);
+    const seats = await res.json();
+    const g = document.getElementById('seatsGrid');
+    if (!seats.length) {
+      g.innerHTML = '<div style="color:var(--muted);font-size:.8rem;grid-column:1/-1">No pre-assigned seats — type one below</div>';
+    } else {
+      g.innerHTML = seats.map(s => `
+        <button class="s-btn ${s.ticket_status !== 'available' ? s.ticket_status : ''}"
+          id="s_${s.seat_number}"
+          onclick="pickSeat('${s.seat_number}','${s.ticket_status}')"
+          ${s.ticket_status !== 'available' ? 'disabled' : ''}>
+          ${s.seat_number}
+        </button>`).join('');
+    }
+  } catch {
+    document.getElementById('seatsGrid').innerHTML =
+      '<div style="color:var(--muted);font-size:.8rem;grid-column:1/-1">Could not load seats</div>';
+  }
+  openOverlay('bookingOverlay');
+}
+
+function pickSeat(num, status) {
+  if (status !== 'available') return;
+  document.querySelectorAll('.s-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById(`s_${num}`)?.classList.add('sel');
+  document.getElementById('manualSeat').value = '';
+  selectedSeat = num;
+}
+
+function nextToPayment() {
+  const manual = document.getElementById('manualSeat').value.trim();
+  if (manual) selectedSeat = manual;
+  if (!selectedSeat) { setAlert('alertBk','error','Please select or enter a seat number.'); return; }
+  setAlert('alertBk','','');
+  document.getElementById('cfEvt').textContent  = currentEvent.event_name;
+  document.getElementById('cfSeat').textContent = selectedSeat;
+  document.getElementById('cfAmt').textContent  = `R${parseFloat(currentEvent.ticket_price).toFixed(2)}`;
+  goStep(2);
+}
+
+function backToSeats() { goStep(1); }
+
+async function confirmBooking() {
+  try {
+    const res  = await fetch(`${API}/bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id:        currentUser.id,
+        event_id:       currentEvent.id,
+        seat_number:    selectedSeat,
+        payment_method: document.getElementById('payMethod').value
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Booking failed');
+    fillReceipt(data.receipt);
+    goStep(3);
+  } catch (err) {
+    setAlert('alertBk', 'error', err.message);
+  }
+}
+
+function fillReceipt(r) {
+  const start = new Date(r.start_datetime);
+  const end   = new Date(r.end_datetime);
+  document.getElementById('rc_event').textContent  = r.event_name;
+  document.getElementById('rc_cat').textContent    = `${EMOJIS[r.category_name]||'🎪'} ${r.category_name}`;
+  document.getElementById('rc_seat').textContent   = r.seat_number;
+  document.getElementById('rc_name').textContent   = r.customer_name;
+  document.getElementById('rc_email').textContent  = r.customer_email;
+  document.getElementById('rc_date').textContent   = start.toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('rc_time').textContent   = start.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}) + ' – ' + end.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('rc_venue').textContent  = r.venue_name;
+  document.getElementById('rc_method').textContent = r.payment_method;
+  document.getElementById('rc_amt').textContent    = `R${parseFloat(r.total_amount).toFixed(2)}`;
+  document.getElementById('rc_txn').textContent    = `TXN: ${r.transaction_ref} · Booking #${r.booking_id}`;
+}
+
+// ── My Tickets ───────────────────────────────────────
+async function loadBookings() {
+  const wrap = document.getElementById('bookingsWrap');
+  wrap.innerHTML = '<div class="empty"><div class="spinner"></div><p>Loading…</p></div>';
+  try {
+    const res = await fetch(`${API}/users/${currentUser.id}/bookings`);
+    const bks = await res.json();
+    if (!bks.length) {
+      wrap.innerHTML = `<div class="empty"><div class="empty-icon">🎟️</div><h3>No bookings yet</h3><p>Browse events and book your first ticket!</p><br><button class="btn btn-grad" style="border-radius:var(--r)" onclick="showSection('events')">Browse Events</button></div>`;
+      return;
+    }
+    wrap.innerHTML = bks.map(b => {
+      const d   = new Date(b.start_datetime);
+      const sts = b.status === 'confirmed' ? 'tp-confirmed' : b.status === 'cancelled' ? 'tp-cancelled' : 'tp-inprogress';
+      return `
+      <div class="ticket-card">
+        <div class="tc-top">
+          <div class="tc-name">${b.event_name}</div>
+          <span class="tc-pill ${sts}">${b.status}</span>
+        </div>
+        <div class="tc-meta">
+          <span>📅 ${d.toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'})}</span>
+          <span>💺 Seat ${b.seat_number}</span>
+          <span>📍 ${b.venue_name}</span>
+          <span>💳 ${b.payment_method || '—'}</span>
+        </div>
+        <div class="tc-foot">
+          <div class="tc-price">R${parseFloat(b.total_amount).toFixed(2)}</div>
+          <div class="tc-txn">${b.transaction_ref || ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch {
+    wrap.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h3>Could not load bookings</h3></div>`;
+  }
+}
+
+// ── Auth ─────────────────────────────────────────────
+function openAuth(tab) { switchTab(tab); openOverlay('authOverlay'); }
+
+function switchTab(tab) {
+  document.getElementById('tabLogin').classList.toggle('active',    tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('loginForm').style.display    = tab === 'login'    ? '' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? '' : 'none';
+  document.getElementById('authTitle').textContent = tab === 'login' ? 'Welcome back' : 'Create account';
+  document.getElementById('authSub').textContent   = tab === 'login' ? 'Sign in to your TicketFlow account' : 'Join TicketFlow — it\'s free';
+  setAlert('alertAuth', '', '');
+}
+
+async function doLogin() {
+  const email = document.getElementById('liEmail').value.trim();
+  const pass  = document.getElementById('liPass').value;
+  if (!email || !pass) { setAlert('alertAuth','error','Please fill in all fields'); return; }
+  try {
+    const res  = await fetch(`${API}/users/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password:pass}) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    currentUser = data.user;
+    localStorage.setItem('tf_user', JSON.stringify(currentUser));
+    updateNav();
+    closeOverlay('authOverlay');
+  } catch(err) { setAlert('alertAuth','error',err.message); }
+}
+
+async function doRegister() {
+  const first_name   = document.getElementById('rgFirst').value.trim();
+  const last_name    = document.getElementById('rgLast').value.trim();
+  const email        = document.getElementById('rgEmail').value.trim();
+  const password     = document.getElementById('rgPass').value;
+  const phone_number = document.getElementById('rgPhone').value.trim();
+  if (!first_name||!last_name||!email||!password) { setAlert('alertAuth','error','Please fill in all required fields'); return; }
+  try {
+    const res  = await fetch(`${API}/users/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({first_name,last_name,email,password,phone_number:phone_number||undefined}) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
+    setAlert('alertAuth','ok','Account created! Please sign in.');
+    setTimeout(() => switchTab('login'), 1300);
+  } catch(err) { setAlert('alertAuth','error',err.message); }
+}
+
+// ── Step helpers ─────────────────────────────────────
+function goStep(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById(`bkPane${i}`).style.display = i===n ? '' : 'none';
+    const el = document.getElementById(`bkStep${i}`);
+    el.classList.toggle('act',  i===n);
+    el.classList.toggle('done', i<n);
+  });
+}
+
+// ── Overlay helpers ──────────────────────────────────
+function openOverlay(id)  { document.getElementById(id).classList.add('open'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeOverlay(o.id); });
+});
+
+// ── Alert helper ─────────────────────────────────────
+function setAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = `alert${type ? ' alert-'+type+' show' : ''}`;
+  el.textContent = msg;
+}
+</script>
+</body>
+</html>
+
