@@ -584,3 +584,70 @@ JOIN event   e ON t.event_id   = e.id
 JOIN venue   v ON e.venue_id   = v.id
 LEFT JOIN payment p ON p.booking_id = b.id;
  
+-- ── Sub-queries ─────────────────────────────────
+ 
+-- Find events that are more expensive than the average ticket price
+SELECT name, ticket_price
+FROM event
+WHERE ticket_price > (
+    SELECT AVG(ticket_price) FROM event
+);
+ 
+-- Find customers who have made at least one confirmed booking
+SELECT first_name, last_name, email
+FROM users
+WHERE id IN (
+    SELECT user_id FROM booking WHERE status = 'confirmed'
+);
+ 
+--  Find the event with the highest ticket price
+SELECT name, ticket_price
+FROM event
+WHERE ticket_price = (
+    SELECT MAX(ticket_price) FROM event
+);
+ 
+-- Find venues that have hosted events with ticket price above R400
+SELECT name, address, capacity
+FROM venue
+WHERE id IN (
+    SELECT venue_id FROM event WHERE ticket_price > 400
+);
+ 
+-- Showing users who have NEVER made a booking
+SELECT first_name, last_name, email
+FROM users
+WHERE id NOT IN (
+    SELECT user_id FROM booking WHERE user_id IS NOT NULL
+);
+ 
+-- =====================================================
+--          VERIFY DATA USING VIEWS
+-- =====================================================
+ 
+SELECT * FROM vw_event_details;
+SELECT * FROM vw_booking_summary;
+SELECT * FROM vw_ticket_details;
+SELECT * FROM vw_category_revenue;
+ 
+-- =====================================================
+--         RECORD COUNT VERIFICATION
+-- =====================================================
+ 
+SELECT 'role'     AS table_name, COUNT(*) AS records FROM role
+UNION ALL
+SELECT 'users',     COUNT(*) FROM users
+UNION ALL
+SELECT 'category',  COUNT(*) FROM category
+UNION ALL
+SELECT 'venue',     COUNT(*) FROM venue
+UNION ALL
+SELECT 'event',     COUNT(*) FROM event
+UNION ALL
+SELECT 'booking',   COUNT(*) FROM booking
+UNION ALL
+SELECT 'payment',   COUNT(*) FROM payment
+UNION ALL
+SELECT 'ticket',    COUNT(*) FROM ticket;
+ 
+SELECT 'PHASE 3 COMPLETE' AS STATUS;
