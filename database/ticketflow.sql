@@ -243,6 +243,93 @@ JOIN venue    v ON e.venue_id    = v.id
 JOIN category c ON e.category_id = c.id
 JOIN users    u ON e.organizer_id = u.id;
  
+-- Booking summary showing customer, payment and booking info
+CREATE OR REPLACE VIEW vw_booking_summary AS
+SELECT
+    b.id                                    AS booking_id,
+    b.booking_time,
+    b.total_amount,
+    b.status                                AS booking_status,
+    CONCAT(u.first_name, ' ', u.last_name)  AS customer_name,
+    u.email                                 AS customer_email,
+    p.payment_method,
+    p.payment_status,
+    p.transaction_ref
+FROM booking b
+JOIN  users   u ON b.user_id    = u.id
+LEFT JOIN payment p ON p.booking_id = b.id;
+ 
+-- Ticket details with event and seat info
+CREATE OR REPLACE VIEW vw_ticket_details AS
+SELECT
+    t.id                                    AS ticket_id,
+    t.seat_number,
+    t.ticket_status,
+    e.name                                  AS event_name,
+    e.start_datetime,
+    v.name                                  AS venue_name,
+    CONCAT(u.first_name, ' ', u.last_name)  AS customer_name
+FROM ticket t
+JOIN  event   e ON t.event_id   = e.id
+JOIN  venue   v ON e.venue_id   = v.id
+LEFT JOIN booking b ON t.booking_id = b.id
+LEFT JOIN users   u ON b.user_id    = u.id;
+ 
+-- Revenue summary per category
+CREATE OR REPLACE VIEW vw_category_revenue AS
+SELECT
+    c.name                  AS category_name,
+    COUNT(e.id)             AS total_events,
+    AVG(e.ticket_price)     AS avg_ticket_price,
+    MAX(e.ticket_price)     AS max_ticket_price,
+    MIN(e.ticket_price)     AS min_ticket_price
+FROM event e
+JOIN category c ON e.category_id = c.id
+GROUP BY c.name;
+ 
+-- =====================================================
+--                       QUERIES
+-- =====================================================
+ 
+-- ── Company Information Queries ─────────────────
+ 
+-- Show all upcoming events with venue and category
+SELECT
+    e.name          AS event_name,
+    e.start_datetime,
+    e.ticket_price,
+    v.name          AS venue,
+    c.name          AS category
+FROM event e
+JOIN venue    v ON e.venue_id    = v.id
+JOIN category c ON e.category_id = c.id
+WHERE e.start_datetime > NOW()
+ORDER BY e.start_datetime ASC;
+ 
+-- Show all confirmed bookings with customer details
+SELECT
+    b.id            AS booking_id,
+    CONCAT(u.first_name, ' ', u.last_name) AS customer,
+    b.total_amount,
+    b.status,
+    b.booking_time
+FROM booking b
+JOIN users u ON b.user_id = u.id
+WHERE b.status = 'confirmed'
+ORDER BY b.booking_time DESC;
+ 
+-- Show all tickets that are sold with event and customer info
+SELECT
+    t.seat_number,
+    e.name          AS event_name,
+    v.name          AS venue,
+    CONCAT(u.first_name, ' ', u.last_name) AS customer
+FROM ticket t
+JOIN event   e ON t.event_id   = e.id
+JOIN venue   v ON e.venue_id   = v.id
+JOIN booking b ON t.booking_id = b.id
+JOIN users   u ON b.user_id    = u.id
+WHERE t.ticket_status = 'sold';
  
  
  
