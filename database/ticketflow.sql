@@ -500,3 +500,87 @@ FROM event e
 LEFT JOIN ticket t ON t.event_id = e.id
 GROUP BY e.id, e.name;
  
+-- ── GROUP BY & HAVING ────────────────────────────
+ 
+-- Show categories that have more than 1 event
+SELECT
+    c.name          AS category,
+    COUNT(e.id)     AS event_count
+FROM category c
+JOIN event e ON e.category_id = c.id
+GROUP BY c.name
+HAVING COUNT(e.id) > 1;
+ 
+-- Show customers who have spent more than R500 total
+SELECT
+    CONCAT(u.first_name, ' ', u.last_name)  AS customer,
+    COUNT(b.id)                             AS total_bookings,
+    SUM(b.total_amount)                     AS total_spent
+FROM users u
+JOIN booking b ON b.user_id = u.id
+WHERE b.status = 'confirmed'
+GROUP BY u.id, u.first_name, u.last_name
+HAVING SUM(b.total_amount) > 500;
+ 
+-- Show venues that have hosted more than 1 event
+SELECT
+    v.name          AS venue,
+    COUNT(e.id)     AS events_hosted
+FROM venue v
+JOIN event e ON e.venue_id = v.id
+GROUP BY v.id, v.name
+HAVING COUNT(e.id) > 1;
+ 
+-- ── JOINS ───────────────────────────────────────
+ 
+-- INNER JOIN - Events with their venue and category
+SELECT
+    e.name          AS event_name,
+    e.ticket_price,
+    v.name          AS venue,
+    v.address,
+    c.name          AS category
+FROM event e
+INNER JOIN venue    v ON e.venue_id    = v.id
+INNER JOIN category c ON e.category_id = c.id;
+ 
+-- LEFT JOIN - All users and their bookings (including users with no bookings)
+SELECT
+    CONCAT(u.first_name, ' ', u.last_name)  AS customer,
+    u.email,
+    b.id            AS booking_id,
+    b.total_amount,
+    b.status
+FROM users u
+LEFT JOIN booking b ON b.user_id = u.id
+ORDER BY u.last_name;
+ 
+-- LEFT JOIN - All events and their tickets (including events with no tickets)
+SELECT
+    e.name          AS event_name,
+    e.event_capacity,
+    t.seat_number,
+    t.ticket_status
+FROM event e
+LEFT JOIN ticket t ON t.event_id = e.id
+ORDER BY e.name;
+ 
+-- Multi-table JOIN - Full booking receipt
+SELECT
+    b.id                                        AS booking_id,
+    CONCAT(u.first_name, ' ', u.last_name)      AS customer,
+    e.name                                      AS event_name,
+    v.name                                      AS venue,
+    t.seat_number,
+    b.total_amount,
+    b.status,
+    p.payment_method,
+    p.payment_status,
+    p.transaction_ref
+FROM booking b
+JOIN users   u ON b.user_id    = u.id
+JOIN ticket  t ON t.booking_id = b.id
+JOIN event   e ON t.event_id   = e.id
+JOIN venue   v ON e.venue_id   = v.id
+LEFT JOIN payment p ON p.booking_id = b.id;
+ 
