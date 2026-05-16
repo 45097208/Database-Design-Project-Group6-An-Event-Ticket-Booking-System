@@ -362,8 +362,34 @@ SELECT first_name, last_name, email
 FROM users
 ORDER BY last_name ASC, first_name ASC;
   
+ -- ── LIKE, AND, OR Operators ─────────────────────
  
+-- Find users whose email contains 'example'
+SELECT first_name, last_name, email
+FROM users
+WHERE email LIKE '%example%';
  
+-- Find events that are Music OR Sports category
+SELECT e.name, e.ticket_price, c.name AS category
+FROM event e
+JOIN category c ON e.category_id = c.id
+WHERE c.name = 'Music' OR c.name = 'Sports';
+ 
+-- Find confirmed bookings with amount greater than R300
+SELECT id, total_amount, status, booking_time
+FROM booking
+WHERE status = 'confirmed' AND total_amount > 300.00;
+ 
+-- Find venues with capacity between 300 and 2000
+SELECT name, address, capacity
+FROM venue
+WHERE capacity >= 300 AND capacity <= 2000;
+ 
+-- Find events with names that start with the letter 'J' or 'A'
+SELECT name, start_datetime, ticket_price
+FROM event
+WHERE name LIKE 'J%' OR name LIKE 'A%';
+  
 -- =====================================================
 --  PART 5 — AGGREGATES, JOINS & SUBQUERIES
 --  Member 5
