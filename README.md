@@ -110,7 +110,7 @@ Make sure you have the following installed:
 
 ### Step 1 — Clone the Repository
 ```bash
-git clone https://github.com/yourrepo/ticketflow.git
+git clone https://github.com/45097208/Database-Design-Project-Group6-An-Event-Ticket-Booking-System.git
 cd ticketflow
 ```
 
